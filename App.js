@@ -7,15 +7,14 @@ import Home from './src/screen/home';
 import History from './src/screen/history';
 import AddTodo from './src/screen/addTodo';
 import Login from './src/screen/login';
-;
-
+import { Platform } from 'react-native'
+import TabBottomNavigation from './src/screen/bottomTab';
 
 
 
 const Tab = createStackNavigator();
 
 const App = () =>{
-
   return (
     <NavigationContainer>
         <StatusBar 
@@ -26,8 +25,9 @@ const App = () =>{
         initialRouteName='splash'
         screenOptions={{ headerShown:false}}
       >
+        <Tab.Screen name='home' component={TabBottomNavigation}/>
         <Tab.Screen name='splash' component={Splash}/>
-        <Tab.Screen name='home' component={Home}/>
+        {/* <Tab.Screen name='home' component={Home}/> */}
         <Tab.Screen name='history' component={History} options={{headerShown:true,headerTitle:"History your task"}}/>
         <Tab.Screen name='login' component={Login}/>
         <Tab.Screen name='addtodo' component={AddTodo} options={{headerShown:true,headerTitle:"Add new task"}}/>

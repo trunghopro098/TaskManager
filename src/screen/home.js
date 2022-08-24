@@ -1,7 +1,10 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, StatusBar } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { windowW } from '../util/widthHeight'
+import { windowH, windowW } from '../util/widthHeight'
+import * as Progress from 'react-native-progress';
+
+
 export default function Home({navigation}) {
     const [task, settask] = useState([])
     const [All, setAll] = useState([])
@@ -150,8 +153,13 @@ export default function Home({navigation}) {
 
     }
   return (
-    <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+    <SafeAreaView style={{flex: 1}}>
+        <ScrollView  style={styles.container}>
+        <StatusBar 
+            backgroundColor="white"
+            barStyle="dark-content"
+        />
+        {/* <View style={styles.header}>
           <TouchableOpacity style={{...styles.btn, backgroundColor:'tomato'}} onPress={()=>{navigation.navigate('history')}}>
             <Text style={{color: "white", fontWeight:'bold'}}>History</Text>
           </TouchableOpacity>
@@ -164,61 +172,129 @@ export default function Home({navigation}) {
             </TouchableOpacity>
           }
           
-        </View>
-        <View style={styles.content}>
-           <Text style={{color:'black', fontWeight:'bold', fontSize: 17 }}>
-            Hello {name} 
-           </Text>
-           <Text style={{  fontSize: 13, textAlign:'center', fontStyle: 'italic',}}>
-           Today {datetime} Wish you a happy drawing day happy and well done.
-           </Text>
-        </View>
-        <View style={styles.content1}>
-           <Text style={{color:'black', fontWeight:'bold', fontSize: 17 }}>
-            Your task today date {datetime}
-           </Text>
-           <TouchableOpacity style={{marginRight:10}} 
-           onPress={()=>{
-            const a = [];
-            setrefresh(!refresh) 
-            settask(a)
-            }}>
-           <Image source={require('../public/icons/refresh.png')} resizeMode="contain" style={{width: 30, height: 30}} />
-           </TouchableOpacity>
-        </View>
-        <ScrollView styles={{width:windowW}}>
-            {task?.length > 0 ?
-            <>
-            {task.map((value)=>{
-                return(
-                    <View key={value.id} style={{...styles.wrapItem, backgroundColor: value.status ? "#e6ffff":"white" }}>
-                     {value.status == true ?
-                        <TouchableOpacity onPress={()=>{
-                            check(value.id)
-                        }}>
-                            <Image source={require('../public/icons/uncheck.png')} resizeMode="contain" style={{width: 25, height: 25}} />
-                        </TouchableOpacity>:
-                        <TouchableOpacity onPress={()=>{
-                            uncheck(value.id)
-                        }}>
-                            <Image source={require('../public/icons/check.png')} resizeMode="contain" style={{width: 25, height: 25}} />
-                        </TouchableOpacity>
-                     }
-                     <TouchableOpacity onPress={()=>d(value.id)}>
-                        <Image source={require('../public/icons/delete.png')} resizeMode="contain" style={{width: 25, height: 25, marginLeft:5}} />
-                     </TouchableOpacity>
-                        
-                     <Text style={{ marginLeft:10, fontSize: 15, color:'gray', maxWidth: windowW-110}}>{value.name}</Text>
-                    </View>
-                )
-            })}
-            </>:
-            <View style={{width:'100%', flexDirection:'row', justifyContent:"center", alignItems:"center" ,marginTop:150}}>
-            <Text>No mission!</Text>
-         </View>
-            }
-        </ScrollView>
+        </View> */}
+        <View style={styles.header1}>
+            <Text style={{fontSize:18, color:'gray', }}>Hey, {name} !</Text>
+            <Text style={{fontSize:20, color:'black', fontWeight:'bold', marginTop: 5 }}>You have</Text>
+            <Text style={{fontSize:20, color:'black', fontWeight:'bold', marginTop: 5 }}>4 task today</Text>
+            <View style={styles.card1}>
+                <View style={styles.contentC1}>
+                    <Text style={{fontSize:18, color:'black', fontWeight:'bold', marginTop: 5 }}>Task complete</Text>
+                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>4/5 task</Text>
+                </View>
+                <View style={styles.contentC1}>
+                <Progress.Circle
+                    progress={100}
+                    size={70}
+                    showsText={true} 
+                    formatText={()=>`4%`}
+                    color={'#0000ff'} 
+                    thickness={5} 
+                    borderWidth={1}      
+                    borderColor={'yellow'}
+                    />
+                    <Text style={{fontSize:14, color:'gray',marginTop: 6}}>Completed</Text>
+                </View>
 
+              
+            </View>
+            <View style={styles.card1}>
+                <View style={styles.contentC1}>
+                    <Text style={{fontSize:18, color:'black', fontWeight:'bold', marginTop: 5 }}>To Do</Text>
+                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>4 Task today</Text>
+                </View>
+                <View style={styles.contentC1}>
+                <Progress.Circle
+                    progress={0.4}
+                    size={70}
+                    showsText={true} 
+                    formatText={()=>`4%`}
+                    color={'#0000ff'} 
+                    thickness={5} 
+                    borderWidth={1}      
+                    borderColor={'yellow'}   
+                    direction='counter-clockwise'  
+                    />
+                    <Text style={{fontSize:14, color:'gray', }}>In progress</Text>
+                </View>
+
+              
+            </View>
+        </View>
+
+            <Text style={{color:'black', fontWeight:'bold', fontSize: 20, marginLeft: 12, marginTop: 10 }}>
+            All your mission
+           </Text>
+        <View style={styles.content1}>
+            <View style={{...styles.card2,backgroundColor:'#0000ff', borderRadius: 20, padding: 10, flexDirection:'column', justifyContent:'space-between', alignItems:"center"}}>
+                <Text style={{color:'white', fontSize: 15, fontWeight:'bold'}}>Task completed</Text>
+                <Progress.Circle
+                    progress={0.4}
+                    size={90}
+                    showsText={true} 
+                    formatText={()=>`4%`}
+                    color={'white'} 
+                    thickness={10} 
+                    borderWidth={1}      
+                    borderColor={'yellow'}     
+                    />
+                <Text style={{color:'white', fontSize: 15, fontWeight:'bold'}}>20 Task</Text>
+
+            </View>
+            <View style={{...styles.card2, borderRadius: 20, flexDirection:'column', justifyContent:'space-between', alignItems:"center"}}>
+               <View style={{
+                width:'100%',
+                height:"45%",
+                backgroundColor:'white',
+                borderRadius:10,
+                flexDirection:'row',
+                justifyContent:'space-between',
+                alignItems:'center',
+                padding: 8,
+                backgroundColor:'#d966ff'
+                }}>
+                    <Text style={{color:'white', fontSize: 13, fontWeight:'bold', maxWidth:'50%'}}>Task Completed</Text>
+                    <Progress.Circle
+                    progress={0.4}
+                    size={60}
+                    showsText={true} 
+                    formatText={()=>`4%`}
+                    color={'white'} 
+                    thickness={5} 
+                    borderWidth={1}      
+                    borderColor={'yellow'}     
+                    />
+
+
+               </View>
+               <View style={{
+                width:'100%',
+                height:"45%",
+                backgroundColor:'white',
+                borderRadius:10,
+                flexDirection:'row',
+                justifyContent:'space-between',
+                alignItems:'center',
+                padding: 8,
+                backgroundColor:'#001a13'
+                }}>
+                    <Text style={{color:'white', fontSize: 13, fontWeight:'bold', maxWidth:'50%'}}>Task Completed</Text>
+                    <Progress.Circle
+                    progress={0.4}
+                    size={60}
+                    showsText={true} 
+                    formatText={()=>`4%`}
+                    color={'white'} 
+                    thickness={5} 
+                    borderWidth={1}      
+                    borderColor={'yellow'} 
+                    direction='counter-clockwise'    
+                    />
+               </View>
+
+            </View>
+        </View>
+        </ScrollView>
     </SafeAreaView>
   )
 }
@@ -226,13 +302,16 @@ export default function Home({navigation}) {
 const styles = StyleSheet.create({
     container:{
         flex:1,
+        backgroundColor:'white'
     },
     header:{
         width:"100%",
         height:55,
+
         backgroundColor:'white',
         shadowColor:'#000',
         shadowOffset:{width:2, height: 2},
+
         shadowOpacity:.5,
         shadowRadius:4,
         elevation:4,
@@ -240,7 +319,6 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-around',
         alignItems:'center',
-
     },
     btn:{
         height: "70%",
@@ -261,18 +339,19 @@ const styles = StyleSheet.create({
     },
     content1:{
         width:"100%",
-        height:40,
         backgroundColor:'white',
-        shadowColor:'#000',
-        shadowOffset:{width:2, height: 2},
-        shadowOpacity:.5,
-        shadowRadius:4,
-        elevation:4,
+        // shadowColor:'#000',
+        // shadowOffset:{width:2, height: 2},
+        // shadowOpacity:.5,
+        // shadowRadius:4,
+        // elevation:4,
         flexDirection:'row',
         justifyContent:'space-between',
         marginTop: 5,
         paddingHorizontal:5,
-        alignItems:"center"
+        alignItems:"center",
+        paddingHorizontal: 12,
+        
     },
     wrapItem:{
         marginHorizontal: 5,
@@ -293,5 +372,36 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         alignItems:'center'
 
+    },
+    header1:{
+        width:windowW,
+        paddingHorizontal: 12,
+        paddingTop: 10
+    },
+    card1:{
+        width: windowW-24,
+        height: 100,
+        backgroundColor:'white',
+        shadowColor:'#000',
+        shadowOffset:{width:2, height: 2},
+        shadowOpacity:.5,
+        shadowRadius:4,
+        elevation:4,
+        padding:8,
+        marginTop: 8,
+        borderRadius: 8,
+        flexDirection:'row',
+        justifyContent:'space-between',
+        // alignItems:'center'
+    },
+    contentC1:{
+        flexDirection:'column',
+        justifyContent: 'space-around',
+
+    },
+    card2:{
+        // backgroundColor: 'red',
+        height: 180,
+        width:windowW*0.5-24
     }
 })
