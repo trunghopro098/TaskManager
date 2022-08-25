@@ -28,9 +28,9 @@ const App = () =>{
         <Tab.Screen name='home' component={TabBottomNavigation}/>
         <Tab.Screen name='splash' component={Splash}/>
         {/* <Tab.Screen name='home' component={Home}/> */}
-        <Tab.Screen name='history' component={History} options={{headerShown:true,headerTitle:"History your task"}}/>
+        <Tab.Screen name='history' component={History} />
         <Tab.Screen name='login' component={Login}/>
-        <Tab.Screen name='addtodo' component={AddTodo} options={{headerShown:true,headerTitle:"Add new task"}}/>
+        <Tab.Screen name='addtodo' component={AddTodo}/>
       </Tab.Navigator>
     </NavigationContainer>
   );

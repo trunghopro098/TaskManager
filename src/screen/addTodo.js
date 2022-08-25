@@ -9,21 +9,26 @@ import background1 from '../public/img/bg.png'
 export default function AddTodo({navigation}) {
     const [name, setname] = useState('')
     const [task, settask] = useState([])
-    const [show, setshow] = useState(true)
+    const [refresh, setrefresh] = useState(true)
     const today = new Date()
     const datetime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
     
     useEffect(() => {
+        navigation.addListener('focus',()=>{
+            console.log("xin chao")
         getTask()
-    }, [show])
+        })
+        getTask()
+    }, [refresh])
 
     const getTask = async()=>{
         try {
             const tasklocal = await AsyncStorage.getItem("TASK")
             if(tasklocal !== null){
                 const arr = JSON.parse(tasklocal)
-                console.log(arr)
                 settask(arr)
+            }else{
+                settask([])
             }
         } catch (error) {
             console.log(error)
@@ -33,7 +38,7 @@ export default function AddTodo({navigation}) {
         const time = today.getHours()+'-'+(today.getMinutes())+'-'+today.getSeconds()
         const d1 = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
         let data = [];
-        if(name.trim() !== "" && name.length > 10){
+        if(name.trim() !== "" && name.length > 3){
             const arrItem = {
                 id:time+d1,
                 name: name,
@@ -47,34 +52,35 @@ export default function AddTodo({navigation}) {
             }
             await AsyncStorage.setItem("TASK", JSON.stringify(data))
             // await AsyncStorage.removeItem("TASK")
-            setname('')
-            setshow(!show)
             Alert.alert(
                 "Alert",
-                "Add task success! When you goback to the main screen, press the refresh icon to load the display of your task!",
+                "Add task success!",
                 [
                   {
-                    text: "New Task",
+                    text: "Ok",
                     style: "cancel"
                   },
-                  { text: "Back home", onPress: () => {navigation.goBack('home')} }
                 ]
               );
-            // alert("")
+              setname('')
+              data = []
+              setrefresh(!refresh)
         }else{
-            alert("Please enter a task name that is more than 10 characters long!")
+            alert("Please enter a task name that is more than 3 characters long!")
         }
     }
   return (
-    <ImageBackground
-    source={background1}
-    style={styles.container}>
+    <SafeAreaView style={{flex: 1}}>
+        <View style={styles.header}>
+            <Text style={{fontSize: 16, color:'black', fontWeight:'bold'}}>New task</Text>
+        </View>
+
       <View style={styles.content}>
-        <Text style={{color: "white",extAlign:'center', fontSize: 16, fontWeight:'bold', marginBottom: 20, marginTop:-30}}>Enter your task name in today's list</Text>
+        <Text style={{color: "black",extAlign:'center', fontSize: 16, fontWeight:'bold', marginBottom: 20, marginTop:-30}}>Enter your task name in today's list</Text>
       <TextInput
         style={styles.inputForm}
         placeholder="Enter task name"
-        placeholderTextColor="white" 
+        placeholderTextColor="black" 
         onChangeText={setname}
         value={name}
        />
@@ -86,13 +92,27 @@ export default function AddTodo({navigation}) {
             </LinearGradient>
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
     container:{
         flex:1
+    },
+    header:{
+        width:"100%",
+        height:40,
+        backgroundColor:'white',
+        shadowColor:'#000',
+        shadowOffset:{width:2, height: 2},
+        shadowOpacity:.5,
+        shadowRadius:4,
+        elevation:4,
+        padding: 8,
+        flexDirection:'row',
+        justifyContent:'flex-start',
+        alignItems:'center',
     },
     content:{
         width:'100%',
@@ -106,9 +126,9 @@ const styles = StyleSheet.create({
         width:windowW*0.8,
         height: 50,
         borderWidth:1,
-        borderColor:"white",
+        borderColor:"black",
         borderRadius:10,
-        color:"white",
+        color:"black",
         paddingHorizontal:8
         // marginTop:-40,
         // textAlign:"center"

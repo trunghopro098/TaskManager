@@ -11,6 +11,18 @@ export default function Home({navigation}) {
     const [name, setname] = useState('')
     const [refresh, setrefresh] = useState(false)
     const [id, setid] = useState()
+
+    const [tasktoday, setTaskToday] = useState(0)
+    const [taskCompletedToday, settaskCompletedToday] = useState(0)
+    const [taskInprogreToday, settaskInprogreToday] = useState(0)
+    const [pesentComplete, setpesentComplete] = useState(0)
+    const [persentIncom, setpersentIncom] = useState(0)
+
+    const [taskAllComplete, settaskAllComplete] = useState(0)
+    const [taskAllImCom, settaskAllInCom] = useState(0)
+    const [persentAllComplete, setpersentAllComplete] = useState(0)
+    const [persentAllIn, setpersentAllIn] = useState(0)
+    const [show, setshow] = useState(false)
     const today = new Date()
     const datetime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
     useEffect(() => {
@@ -18,27 +30,69 @@ export default function Home({navigation}) {
     }, [])
 
     useEffect(() => {
-        getTask()
-    }, [refresh])
+        navigation.addListener('focus',()=>{
+            // setshow(false)
+            getTask()
+            // setshow(true)
+        })
+        
+    }, [])
 
     const getTask = async()=>{
         try {
+            
             const tasklocal = await AsyncStorage.getItem("TASK")
             if(tasklocal !== null){
+                setshow(false)
                 const arr = JSON.parse(tasklocal)
-                const dataf = arr.filter((x)=>x.date === datetime )
-                console.log(dataf)
-                settask(dataf)
+                const dataAllIn = arr.filter((x)=> x.status === false)
+                const dataAllCom = arr.filter((x)=> x.status === true)
+            
+                let perAllInCom = ((dataAllIn.length/arr.length)).toFixed(2)
+                let perAllComplete = ((dataAllCom.length/arr.length)).toFixed(2)
+                settaskAllComplete(dataAllCom.length)
+                settaskAllInCom(dataAllIn.length)
+                setpersentAllComplete(Number(perAllComplete))
+                setpersentAllIn(Number(perAllInCom))
                 setAll(arr)
+                // filter data today
+                const dataToday = arr.filter((x)=>x.date === datetime)
+                if(dataToday.length > 0){
+                    setTaskToday(dataToday.length)
+                    const dataComplete = dataToday.filter((x)=> x.status === true)
+                    const dataInCom = dataToday.filter((x)=> x.status === false)
+                    let perComplete = ((dataComplete.length/dataToday.length)).toFixed(2)
+                    let perInCom = ((dataInCom.length/dataToday.length)).toFixed(2)
+                    settaskCompletedToday(dataComplete.length)
+                    settaskInprogreToday(dataInCom.length)
+                    setpesentComplete(Number(perComplete))
+                    setpersentIncom(Number(perInCom))
+                    setshow(true)
+                    // console.log("num",Number(perComplete))
+                }else{
+                    setTaskToday(0)
+                    setshow(true)
+                }
             }else{
-
-                settask([])
+                setshow(false)
+                settaskAllComplete(0)
+                settaskAllInCom(0)
+                setpersentAllComplete(0)
+                setpersentAllIn(0)
                 setAll([])
+                settaskCompletedToday(0)
+                settaskInprogreToday(0)
+                setpesentComplete(Number(0))
+                setpersentIncom(Number(0))
+                setTaskToday(0)
+                setshow(true)
             }
+           
         } catch (error) {
             console.log(error)
         }
     }
+
     const getUser = async()=>{
         try {
             const user = await AsyncStorage.getItem("NAME")
@@ -159,64 +213,54 @@ export default function Home({navigation}) {
             backgroundColor="white"
             barStyle="dark-content"
         />
-        {/* <View style={styles.header}>
-          <TouchableOpacity style={{...styles.btn, backgroundColor:'tomato'}} onPress={()=>{navigation.navigate('history')}}>
-            <Text style={{color: "white", fontWeight:'bold'}}>History</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={{...styles.btn, backgroundColor:'blue'}} onPress={()=>{navigation.navigate("addtodo")}}>
-            <Text style={{color: "white", fontWeight:'bold'}}>New Task</Text>
-          </TouchableOpacity>
-          {All?.length > 0 && 
-            <TouchableOpacity style={{...styles.btn, backgroundColor:'red'}} onPress={()=>deleted()}>
-                <Text style={{color: "white", fontWeight:'bold'}}>Delete</Text>
-            </TouchableOpacity>
-          }
-          
-        </View> */}
         <View style={styles.header1}>
             <Text style={{fontSize:18, color:'gray', }}>Hey, {name} !</Text>
             <Text style={{fontSize:20, color:'black', fontWeight:'bold', marginTop: 5 }}>You have</Text>
-            <Text style={{fontSize:20, color:'black', fontWeight:'bold', marginTop: 5 }}>4 task today</Text>
+            <View style={{flexDirection: 'row'}}>
+            <Text style={{fontSize:20, color:'red', fontWeight:'bold', marginTop: 5 }}>{tasktoday}</Text>
+            <Text style={{fontSize:20, color:'black', fontWeight:'bold', marginTop: 5 }}> task today</Text>
+            </View>
+            
             <View style={styles.card1}>
                 <View style={styles.contentC1}>
                     <Text style={{fontSize:18, color:'black', fontWeight:'bold', marginTop: 5 }}>Task complete</Text>
-                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>4/5 task</Text>
+                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>{taskCompletedToday}/{tasktoday} task</Text>
                 </View>
-                <View style={styles.contentC1}>
+                {show && <View style={styles.contentC1}>
                 <Progress.Circle
-                    progress={100}
+                    progress={pesentComplete}
                     size={70}
                     showsText={true} 
-                    formatText={()=>`4%`}
+                    formatText={()=>`${((pesentComplete*100).toFixed(0))}%`}
                     color={'#0000ff'} 
                     thickness={5} 
                     borderWidth={1}      
-                    borderColor={'yellow'}
+                    borderColor={'red'}
                     />
                     <Text style={{fontSize:14, color:'gray',marginTop: 6}}>Completed</Text>
-                </View>
+                </View>}
 
               
             </View>
             <View style={styles.card1}>
                 <View style={styles.contentC1}>
                     <Text style={{fontSize:18, color:'black', fontWeight:'bold', marginTop: 5 }}>To Do</Text>
-                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>4 Task today</Text>
+                    <Text style={{fontSize:14, color:'gray', marginTop: 5 }}>{tasktoday} Task today</Text>
                 </View>
-                <View style={styles.contentC1}>
+               {show && <View style={styles.contentC1}>
                 <Progress.Circle
-                    progress={0.4}
+                    progress={persentIncom}
                     size={70}
                     showsText={true} 
-                    formatText={()=>`4%`}
+                    formatText={()=>`${persentIncom*100}%`}
                     color={'#0000ff'} 
                     thickness={5} 
                     borderWidth={1}      
-                    borderColor={'yellow'}   
+                    borderColor={'red'}   
                     direction='counter-clockwise'  
                     />
                     <Text style={{fontSize:14, color:'gray', }}>In progress</Text>
-                </View>
+                </View>}
 
               
             </View>
@@ -226,23 +270,23 @@ export default function Home({navigation}) {
             All your mission
            </Text>
         <View style={styles.content1}>
-            <View style={{...styles.card2,backgroundColor:'#0000ff', borderRadius: 20, padding: 10, flexDirection:'column', justifyContent:'space-between', alignItems:"center"}}>
+           {show && <View style={{...styles.card2,backgroundColor:'#0000ff', borderRadius: 20, padding: 10, flexDirection:'column', justifyContent:'space-between', alignItems:"center"}}>
                 <Text style={{color:'white', fontSize: 15, fontWeight:'bold'}}>Task completed</Text>
                 <Progress.Circle
-                    progress={0.4}
+                    progress={Number(persentAllComplete)}
                     size={90}
                     showsText={true} 
-                    formatText={()=>`4%`}
+                    formatText={()=>`${taskAllComplete} Task`}
                     color={'white'} 
                     thickness={10} 
                     borderWidth={1}      
                     borderColor={'yellow'}     
                     />
-                <Text style={{color:'white', fontSize: 15, fontWeight:'bold'}}>20 Task</Text>
+                <Text style={{color:'white', fontSize: 15, fontWeight:'bold'}}>{taskAllComplete}/{All.length} Task</Text>
 
-            </View>
+            </View>}
             <View style={{...styles.card2, borderRadius: 20, flexDirection:'column', justifyContent:'space-between', alignItems:"center"}}>
-               <View style={{
+               {show && <View style={{
                 width:'100%',
                 height:"45%",
                 backgroundColor:'white',
@@ -255,19 +299,18 @@ export default function Home({navigation}) {
                 }}>
                     <Text style={{color:'white', fontSize: 13, fontWeight:'bold', maxWidth:'50%'}}>Task Completed</Text>
                     <Progress.Circle
-                    progress={0.4}
+                    progress={Number(persentAllComplete)}
                     size={60}
                     showsText={true} 
-                    formatText={()=>`4%`}
+                    formatText={()=>`${(persentAllComplete*100).toFixed(0)}%`}
                     color={'white'} 
                     thickness={5} 
                     borderWidth={1}      
                     borderColor={'yellow'}     
                     />
+               </View>}
 
-
-               </View>
-               <View style={{
+               {show && <View style={{
                 width:'100%',
                 height:"45%",
                 backgroundColor:'white',
@@ -278,19 +321,19 @@ export default function Home({navigation}) {
                 padding: 8,
                 backgroundColor:'#001a13'
                 }}>
-                    <Text style={{color:'white', fontSize: 13, fontWeight:'bold', maxWidth:'50%'}}>Task Completed</Text>
+                    <Text style={{color:'white', fontSize: 13, fontWeight:'bold', maxWidth:'50%'}}>In progress</Text>
                     <Progress.Circle
-                    progress={0.4}
+                    progress={Number(persentAllIn)}
                     size={60}
                     showsText={true} 
-                    formatText={()=>`4%`}
+                    formatText={()=>`${persentAllIn*100}%`}
                     color={'white'} 
                     thickness={5} 
                     borderWidth={1}      
                     borderColor={'yellow'} 
-                    direction='counter-clockwise'    
+                     direction='counter-clockwise'    
                     />
-               </View>
+               </View>}
 
             </View>
         </View>

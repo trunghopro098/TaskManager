@@ -2,6 +2,7 @@ import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, ScrollVi
 import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { windowH, windowW } from '../util/widthHeight'
+import AntDesign from 'react-native-vector-icons/AntDesign';
 export default function History({navigation}) {
     const [task, settask] = useState([])
     const [All, setAll] = useState([])
@@ -12,6 +13,9 @@ export default function History({navigation}) {
     const today = new Date()
     const datetime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
     useEffect(() => {
+        navigation.addListener('focus',()=>{
+        getTask()
+        })
         getTask()
     }, [refresh])
 
@@ -20,161 +24,60 @@ export default function History({navigation}) {
             const tasklocal = await AsyncStorage.getItem("TASK")
             if(tasklocal !== null){
                 const arr = JSON.parse(tasklocal)
-                const dataf = arr.filter((x)=>x.date === datetime )
-                console.log(dataf)
-                settask(dataf)
-                setAll(arr)
-                setdataRender(arr)
-            
+                setdataRender(arr.reverse())
+            }else{
+                setdataRender([])
             }
         } catch (error) {
             console.log(error)
         }
     }
-    const check = (id)=>{
-        setid(id)
+    
+    const confirmDelete = () =>{
         Alert.alert(
-        "Alert",
-        "Are you sure this job is done?",
-        [
-          {
-            text: "Cancel",
-            style: "cancel"
-          },
-          { text: "OK", onPress: () => handleCheck(id) }
-        ]
-      );
-}
-    const handleCheck = async(id)=>{
-        let data = All.map((v)=>{
-            if(v.id === id){
-                return {...v, status: false}
-            }else{
-                return v
-            }
-        })
-        await AsyncStorage.setItem("TASK", JSON.stringify(data))
-        setrefresh(!refresh)
-        alert('Update task success !')
-    }
-    const handleUnCheck = async(id)=>{
-        let data = All.map((v)=>{
-            if(v.id === id){
-                return {...v, status: true}
-            }else{
-                return v
-            }
-        })
-        await AsyncStorage.setItem("TASK", JSON.stringify(data))
-        setrefresh(!refresh)
-        alert('Update task success !')
-    }
-
-    const uncheck = (id)=>{
-            setid(id)
-            Alert.alert(
             "Alert",
-            "Are you sure this job is done?",
+            "Do you want delete all your task?",
             [
               {
                 text: "Cancel",
                 style: "cancel"
               },
-              { text: "OK", onPress: () => handleUnCheck(id) }
+              { text: "Yes", onPress: () => handledeleteAll()}
             ]
           );
     }
-    const hd = async(id)=>{
-        const find = All.findIndex((i)=>i.id == id)
-        let arr = [];
-        if(find !== -1){
-            if(All.length == 1){
-                arr = []
-            }else{
-                All.splice(find,1)
-                arr = All
-            }    
-
-            await AsyncStorage.setItem("TASK", JSON.stringify(arr))
-            alert('Delete task success !')
+    const handledeleteAll = async()=>{
+        try {
+            await AsyncStorage.removeItem("TASK")
+            alert('Delete success !')
             setrefresh(!refresh)
+        } catch (error) {
+            console.log(error)
         }
-    }
-    const d = (id)=>{
-        Alert.alert(
-            "Alert",
-            "Do you want delete this task?",
-            [
-              {
-                text: "Cancel",
-                style: "cancel"
-              },
-              { text: "OK", onPress: () => hd(id) }
-            ]
-          );
     }
     
   return (
     <SafeAreaView style={styles.container}>
+        <View style={{height: windowH*0.2}}>
+        <View style={styles.header}>
+            <Text style={{fontSize: 16, color:'black', fontWeight:'bold'}}>All your task</Text>
+           {dataRender.length > 0 &&  <TouchableOpacity style={{marginRight: 10}} 
+            onPress={()=>{
+                confirmDelete()
+            }}>
+                <AntDesign name="delete" size={22} color={'red'}/>
+            </TouchableOpacity>}
+            
+        </View>
         <View style={styles.content}>
            <Text style={{  fontSize: 13, textAlign:'center', fontStyle: 'italic',}}>
-           all your tasks are both completed and unfinished and you are not allowed to edit previous days task status on this page. Thank you!
+           all your tasks are completed and unfinished and you are not allowed to edit the task status on this page. The task with blue background color is completed, red is not completed.
+     Thank you!
            </Text>
         </View>
-        <View style={styles.content1}>
-           <Text style={{color:'black', fontWeight:'bold', fontSize: 17 }}>
-            Your task today date {datetime}
-           </Text>
-           <TouchableOpacity style={{marginRight:10}} 
-           onPress={()=>{
-            const a = [];
-            setrefresh(!refresh) 
-            setdataRender(a)
-            settask(a)
-            }}>
-           <Image source={require('../public/icons/refresh.png')} resizeMode="contain" style={{width: 30, height: 30}} />
-           </TouchableOpacity>
         </View>
-        <View style={{maxHeight:windowH*0.3}}>
-        <ScrollView styles={{width:windowW,}}>
-            {task?.length > 0 ?
-            <>
-            {task.map((value)=>{
-                return(
-                    <View key={value.id} style={{...styles.wrapItem, backgroundColor: value.status ? "#e6ffff":"white" }}>
-                     {value.status == true ?
-                        <TouchableOpacity onPress={()=>{
-                            check(value.id)
-                        }}>
-                            <Image source={require('../public/icons/uncheck.png')} resizeMode="contain" style={{width: 25, height: 25}} />
-                        </TouchableOpacity>:
-                        <TouchableOpacity onPress={()=>{
-                            uncheck(value.id)
-                        }}>
-                            <Image source={require('../public/icons/check.png')} resizeMode="contain" style={{width: 25, height: 25}} />
-                        </TouchableOpacity>
-                     }
-                     <TouchableOpacity onPress={()=>d(value.id)}>
-                        <Image source={require('../public/icons/delete.png')} resizeMode="contain" style={{width: 25, height: 25, marginLeft:5}} />
-                     </TouchableOpacity>
-                     <Text style={{ marginLeft:10, fontSize: 15, color:'gray', maxWidth: windowW-110}}>{value.name}</Text>
-                    </View>
-                )
-            })}
-            </>:
-            <View style={{width:'100%', flexDirection:'row', justifyContent:"center", alignItems:"center" ,marginTop:20}}>
-                <Text>No mission!</Text>
-             </View>
-            }
-        </ScrollView>
-        </View>
-        <View style={styles.content1}>
-           <Text style={{color:'black', fontWeight:'bold', fontSize: 17 }}>
-           All day
-           </Text>
-        </View>
-           <View style={{maxHeight:windowH*0.3}}>
-            <ScrollView styles={{width:windowW,}}>
+        <View style={{height: windowH*0.8-74}}>
+            <ScrollView styles={{marginBottom: 300}}>
                 {dataRender?.length > 0 ?
                 <>
                 {dataRender.map((value)=>{
@@ -187,13 +90,12 @@ export default function History({navigation}) {
                     )
                 })}
                 </>:
-                <View style={{width:'100%', flexDirection:'row', justifyContent:"center", alignItems:"center" ,marginTop:20}}>
+                <View style={{width:'100%',height: windowH*0.7, flexDirection:'row', justifyContent:"center", alignItems:"center" ,marginTop:20}}>
                     <Text>No mission!</Text>
                 </View>
                 }
             </ScrollView>
-            </View>
-
+        </View>
     </SafeAreaView>
   )
 }
@@ -204,16 +106,16 @@ const styles = StyleSheet.create({
     },
     header:{
         width:"100%",
-        height:55,
+        height:40,
         backgroundColor:'white',
         shadowColor:'#000',
         shadowOffset:{width:2, height: 2},
         shadowOpacity:.5,
         shadowRadius:4,
         elevation:4,
-
+        padding: 8,
         flexDirection:'row',
-        justifyContent:'space-around',
+        justifyContent:'space-between',
         alignItems:'center',
 
     },
